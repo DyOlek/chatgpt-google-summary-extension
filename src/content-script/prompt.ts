@@ -11,7 +11,11 @@ export function getSummaryPrompt(transcript = '', providerConfigs?: ProviderType
         .replace(/^(\s)+|(\s)$/g, '')
     : ''
 
-  return truncateTranscript(text, providerConfigs)
+  const truncated = truncateTranscript(text, providerConfigs)
+
+  const instruction = `Действуй как краткий конспектатор. На входе — транскрипт видео. Верни краткое резюме на русском языке: 2–3 предложения, только ключевые идеи и факты, без вступлений и лишних пояснений.`
+
+  return `${instruction}\n\n${truncated}`
 }
 
 // Seems like 15,000 bytes is the limit for the prompt
@@ -97,7 +101,6 @@ function truncateTranscript(str, providerConfigs) {
 
   const tokenLimit = providerConfigs === ProviderType.GPT3 ? apiLimit : limit
 
-  // if (providerConfigs === ProviderType.GPT3) {
   const encoded: { bpe: number[]; text: string[] } = tokenizer.encode(textStr)
   const bytes = encoded.bpe.length
 
@@ -109,21 +112,11 @@ function truncateTranscript(str, providerConfigs) {
   }
 
   return textStr
-  // } else {
-  //   const bytes = textToBinaryString(str).length
-  //   if (bytes > tokenLimit) {
-  //     const ratio = tokenLimit / bytes
-  //     const newStr = str.substring(0, str.length * ratio)
-  //     return newStr
-  //   }
-  //   return str
-  // }
 }
 
 function truncateTranscriptByToken(str, providerConfigs) {
   const tokenLimit = providerConfigs === ProviderType.GPT3 ? apiLimit : limit
 
-  // if (providerConfigs === ProviderType.GPT3) {
   const encoded: { bpe: number[]; text: string[] } = tokenizer.encode(str)
   const bytes = encoded.bpe.length
 

@@ -11,16 +11,16 @@
     "128": "logo-128.png"
   },
   "host_permissions": [
-    "https://*.openai.com/"
+    "https://*.openai.com/",
+    "https://*.youtube.com/*",
+    "https://youtube.com/*",
+    "https://*.youtube-nocookie.com/*"
   ],
   "permissions": [
     "storage",
     "activeTab",
     "tabs"
   ],
-  "background": {
-    "service_worker": "background.js"
-  },
   "action": {},
   "options_ui": {
     "page": "options.html",
@@ -29,8 +29,9 @@
   "content_scripts": [
     {
       "matches": [
-        "<all_urls>",
-        "*://*/*"
+        "https://*.youtube.com/*",
+        "https://youtube.com/*",
+        "https://*.youtube-nocookie.com/*"
       ],
       "js": [
         "content-script.js"

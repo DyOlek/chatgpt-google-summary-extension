@@ -11,7 +11,8 @@ export function getSummaryPrompt(transcript = '', providerConfigs?: ProviderType
         .replace(/^(\s)+|(\s)$/g, '')
     : ''
 
-  return truncateTranscript(text, providerConfigs)
+  const truncatedText = truncateTranscript(text, providerConfigs)
+  return `Provide a brief summary of the following transcript in Russian:\n\n${truncatedText}`
 }
 
 // Seems like 15,000 bytes is the limit for the prompt

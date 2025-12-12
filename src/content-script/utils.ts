@@ -3,7 +3,6 @@ import Browser from 'webextension-polyfill'
 import $ from 'jquery'
 import copy from 'copy-to-clipboard'
 import { BASE_URL } from '@/config'
-import { config } from './search-engine-configs'
 import { extractFromHtml } from '@/utils/article-extractor/cjs/article-extractor.esm'
 
 export function getPossibleElementByQuerySelector<T extends Element>(
@@ -256,31 +255,6 @@ export function matchSites(site: string) {
 }
 
 export const hostname = location.hostname
-
-export function siteName() {
-  const siteRegex = new RegExp(Object.keys(config).join('|'))
-  const siteName =
-    hostname === 'news.yahoo.co.jp'
-      ? 'yahooJpNews'
-      : hostname.includes('ncbi.nlm.nih.gov')
-      ? 'pubmed'
-      : hostname === 'newspicks.com'
-      ? 'newspicks'
-      : hostname.includes('nikkei.com')
-      ? 'nikkei'
-      : hostname.includes('github.com')
-      ? 'github'
-      : hostname.includes('patents.google.com')
-      ? 'googlePatents'
-      : hostname.match(siteRegex)
-      ? hostname.match(siteRegex)?.[0] || ''
-      : ''
-  return siteName
-}
-
-export function siteConfig() {
-  return config[siteName()]
-}
 
 export const getPageSummaryContntent = async () => {
   const html = document.querySelector('html')?.outerHTML

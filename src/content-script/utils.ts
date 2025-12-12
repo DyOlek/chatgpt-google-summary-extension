@@ -1,3 +1,4 @@
+import { Innertube } from 'youtubei.js'
 import Browser from 'webextension-polyfill'
 import $ from 'jquery'
 import copy from 'copy-to-clipboard'
@@ -44,22 +45,19 @@ export function removeHtmlTags(str: string) {
 }
 
 export async function getLangOptionsWithLink(videoId) {
-  // Get a transcript URL
-  const videoPageResponse = await fetch('https://www.youtube.com/watch?v=' + videoId)
-  const videoPageHtml = await videoPageResponse.text()
-  const splittedHtml = videoPageHtml.split('"captions":')
+  const innertube = await Innertube.create()
+  const videoInfo = await innertube.getInfo(videoId)
+  const transcriptInfo = await videoInfo.getTranscript()
 
-  if (splittedHtml.length < 2) {
+  if (!transcriptInfo.transcript) {
     return
-  } // No Caption Available
+  }
 
-  const captions_json = JSON.parse(splittedHtml[1].split(',"videoDetails')[0].replace('\n', ''))
-  const captionTracks = captions_json.playerCaptionsTracklistRenderer.captionTracks
-  const languageOptions = Array.from(captionTracks).map((i) => {
-    return i.name.simpleText
+  const languageOptions = transcriptInfo.transcript.translation_languages.map((i) => {
+    return i.language_name
   })
 
-  const first = 'English' // Sort by English first
+  const first = 'English'
   languageOptions.sort(function (x, y) {
     return x.includes(first) ? -1 : y.includes(first) ? 1 : 0
   })
@@ -67,29 +65,13 @@ export async function getLangOptionsWithLink(videoId) {
     return x == first ? -1 : y == first ? 1 : 0
   })
 
-  return Array.from(languageOptions).map((langName, index) => {
-    const link = captionTracks.find((i) => i.name.simpleText === langName).baseUrl
+  return Array.from(languageOptions).map((langName) => {
+    const link = transcriptInfo.transcript.translation_languages.find(
+      (i) => i.language_name === langName,
+    ).language_code
     return {
       language: langName,
       link: link,
-    }
-  })
-}
-
-export async function getRawTranscript(link) {
-  // Get Transcript
-  const transcriptPageResponse = await fetch(link) // default 0
-  const transcriptPageXml = await transcriptPageResponse.text()
-
-  // Parse Transcript
-  const jQueryParse = $.parseHTML(transcriptPageXml)
-  const textNodes = jQueryParse[1].childNodes
-
-  return Array.from(textNodes).map((i) => {
-    return {
-      start: i.getAttribute('start'),
-      duration: i.getAttribute('dur'),
-      text: i.textContent,
     }
   })
 }
@@ -248,13 +230,23 @@ export function waitForElm(selector) {
 }
 
 export async function getConverTranscript({ langOptionsWithLink, videoId, index }) {
-  const rawTranscript = !langOptionsWithLink
-    ? []
-    : await getRawTranscript(langOptionsWithLink[index ? index : 0].link)
+  const innertube = await Innertube.create()
+  const videoInfo = await innertube.getInfo(videoId)
+  const transcriptInfo = await videoInfo.getTranscript()
 
-  const transcriptList = !langOptionsWithLink ? [] : await getTranscriptHTML(rawTranscript, videoId)
+  if (!transcriptInfo.transcript) {
+    return []
+  }
 
-  return transcriptList
+  const transcriptList = transcriptInfo.transcript.content.map((i) => {
+    return {
+      start: i.start_ms / 1000,
+      duration: i.duration_ms / 1000,
+      text: i.text,
+    }
+  })
+
+  return await getTranscriptHTML(transcriptList, videoId)
 }
 
 export function matchSites(site: string) {

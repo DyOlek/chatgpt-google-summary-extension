@@ -26,13 +26,15 @@
     "preact": "^10.13.1",
     "prop-types": "^15.8.1",
     "punycode": "^2.1.1",
+    "puppeteer": "^24.32.1",
     "react": "npm:@preact/compat@^17.1.2",
     "react-dom": "npm:@preact/compat@^17.1.2",
     "react-markdown": "^8.0.4",
     "rehype-highlight": "^6.0.0",
     "swr": "^2.0.0",
     "uuid": "^9.0.0",
-    "xss": "^1.0.14"
+    "xss": "^1.0.14",
+    "youtubei.js": "^5.1.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
